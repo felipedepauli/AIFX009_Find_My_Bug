@@ -1,1 +1,5 @@
-build
+.vscode/
+3rdparty/
+build_linux/
+build_win/
+resources/
