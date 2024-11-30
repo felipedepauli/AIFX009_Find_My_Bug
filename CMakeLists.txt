@@ -30,30 +30,13 @@ endif()
 
 # Configura o OpenCV
 find_package(OpenCV REQUIRED)
-
-# Configuração para Boost em 3rdparty
-set(Boost_NO_SYSTEM_PATHS ON)
-set(BOOST_ROOT "${CMAKE_SOURCE_DIR}/3rdparty/boost/src/build")
-set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
-
 find_package(Boost REQUIRED COMPONENTS system)
-if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${BOOST_LIBRARYDIR})
-    message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
-    message(STATUS "Boost libraries: ${BOOST_LIBRARYDIR}")
-else()
-    message(FATAL_ERROR "Boost not found!")
-endif()
-
 
 # Diretórios de include
 include_directories(${CMAKE_SOURCE_DIR}/include/engine/ ${OpenCV_INCLUDE_DIRS})
 
 # Adiciona subdiretórios de clientes e servidores
-add_subdirectory(src/engine/client)
-add_subdirectory(src/engine/server)
+add_subdirectory(src/engine/)
 
 # Mensagem de status
 message(STATUS "Architecture: ${ARCH}")

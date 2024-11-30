@@ -1,4 +1,5 @@
 #include "client/Client.h"
+#include "Comm.h"
 
 // Declara a função parseInputType
 InputType parseInputType(const std::string& typeStr) {
@@ -29,6 +30,7 @@ Client::Client(InputType type) {
     }
 }
 
+// Configura o dispositivo e captura frames
 void Client::run(const std::string& devicePath) {
     if (capture->setDevice(devicePath) != 0) {
         std::cerr << "[Client] Failed to set up the device: " << devicePath << std::endl;
@@ -40,24 +42,30 @@ void Client::run(const std::string& devicePath) {
         return;
     }
 
-    std::cout << "[Client] Starting video playback..." << std::endl;
-
-    // Loop para capturar e exibir frames
     while (true) {
         cv::Mat frame = capture->getFrame();
-        if (frame.empty()) break; // Sai do loop se o vídeo terminar
+        if (frame.empty()) {
+            std::cout << "[Client] End of video or no more frames." << std::endl;
+            break;
+        }
 
-        // Mostra o frame na tela
+        // Exibe o frame
         cv::imshow("Video Playback", frame);
 
-        // Aguarda por 30ms ou até que uma tecla seja pressionada
-        if (cv::waitKey(30) >= 0) break;
+        // Aguarda 30ms ou sai se 'q' for pressionado
+        if (cv::waitKey(30) == 'q') {
+            std::cout << "[Client] Playback interrupted by user." << std::endl;
+            break;
+        }
     }
 
     capture->disableDevice();
-    cv::destroyAllWindows(); // Fecha a janela de exibição
-}
+    cv::destroyAllWindows();
 
+    // Envia mensagem ao servidor
+    Comm comm;
+    comm.sendMessage("Processing completed", "127.0.0.1", 8080);
+}
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
