@@ -1,13 +1,21 @@
-#pragma once
-#include <iostream>
+#ifndef COMM_H
+#define COMM_H
+
+#include <boost/asio.hpp>
+#include <string>
 
 class Comm {
 public:
-    Comm() {
-        std::cout << "[Comm] Oiiii, estou aqui escutando por novas conexões!" << std::endl;
-    }
+    Comm(); // Construtor
 
-    void listen() {
-        std::cout << "[Comm] Escutando novas conexões..." << std::endl;
-    }
+    // Servidor
+    void startListening(int port);
+
+    // Cliente
+    void sendMessage(const std::string& message, const std::string& host, int port);
+
+private:
+    boost::asio::io_context io_context;
 };
+
+#endif // COMM_H

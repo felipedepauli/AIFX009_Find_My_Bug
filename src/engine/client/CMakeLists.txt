@@ -9,6 +9,5 @@ add_executable(
     captures/DirectoryCapture.cpp
 )
 
-# Linka bibliotecas do OpenCV
-find_package(OpenCV REQUIRED)
-target_link_libraries(client PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS})
+# Linka bibliotecas do OpenCV, Boost e a biblioteca engine
+target_link_libraries(client PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} engine)
