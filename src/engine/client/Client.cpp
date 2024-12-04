@@ -1,7 +1,7 @@
 #include "client/Client.h"
 #include "Comm.h"
 
-// Declara a função parseInputType
+// Declares the function parseInputType
 InputType parseInputType(const std::string& typeStr) {
     if (typeStr == "cam") return InputType::cam;
     if (typeStr == "stream") return InputType::streaming;
@@ -10,7 +10,7 @@ InputType parseInputType(const std::string& typeStr) {
     throw std::invalid_argument("Invalid input type: " + typeStr);
 }
 
-// Construtor: Instancia o dispositivo correto com base no tipo de entrada
+// Constructor: Instantiates the correct device based on the input type
 Client::Client(InputType type) {
     switch (type) {
         case InputType::cam:
@@ -30,7 +30,7 @@ Client::Client(InputType type) {
     }
 }
 
-// Configura o dispositivo e captura frames
+// Configures the device, captures frames and sends them to the server
 void Client::run(const std::string& devicePath) {
     if (capture->setDevice(devicePath) != 0) {
         std::cerr << "[Client] Failed to set up the device: " << devicePath << std::endl;
@@ -42,6 +42,20 @@ void Client::run(const std::string& devicePath) {
         return;
     }
 
+    // Establishes connection with the server
+    boost::asio::io_context io_context;
+    boost::asio::ip::tcp::socket socket(io_context);
+    try {
+        boost::asio::ip::tcp::resolver resolver(io_context);
+        auto endpoints = resolver.resolve("127.0.0.1", "8080");
+        boost::asio::connect(socket, endpoints);
+        std::cout << "[Client] Connected to server at 127.0.0.1:8080" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[Client] Failed to connect to server: " << e.what() << std::endl;
+        capture->disableDevice();
+        return;
+    }
+
     while (true) {
         cv::Mat frame = capture->getFrame();
         if (frame.empty()) {
@@ -49,10 +63,28 @@ void Client::run(const std::string& devicePath) {
             break;
         }
 
-        // Exibe o frame
+        // Encodes the frame in JPEG
+        std::vector<uchar> buffer;
+        if (!cv::imencode(".jpg", frame, buffer)) {
+            std::cerr << "[Client] Failed to encode frame." << std::endl;
+            continue;
+        }
+
+        // Sends the frame to the server
+        try {
+            uint32_t frameSize = htonl(buffer.size());
+            boost::asio::write(socket, boost::asio::buffer(&frameSize, sizeof(frameSize))); // Sends size
+            boost::asio::write(socket, boost::asio::buffer(buffer));             // Sends data
+            std::cout << "[Client] Sent frame of size " << buffer.size() << " bytes" << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "[Client] Error sending frame: " << e.what() << std::endl;
+            break;
+        }
+
+        // Displays the frame
         cv::imshow("Video Playback", frame);
 
-        // Aguarda 30ms ou sai se 'q' for pressionado
+        // Waits 30ms or exits if 'q' is pressed
         if (cv::waitKey(30) == 'q') {
             std::cout << "[Client] Playback interrupted by user." << std::endl;
             break;
@@ -62,10 +94,18 @@ void Client::run(const std::string& devicePath) {
     capture->disableDevice();
     cv::destroyAllWindows();
 
-    // Envia mensagem ao servidor
-    Comm comm;
-    comm.sendMessage("Processing completed", "127.0.0.1", 8080);
+    // Closes the connection with the server
+    try {
+        uint32_t frameSize = htonl(1); // Zero indicates termination
+        boost::asio::write(socket, boost::asio::buffer(&frameSize, sizeof(frameSize))); // Sends termination signal
+        socket.close();
+        std::cout << "[Client] Connection closed." << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[Client] Error closing connection: " << e.what() << std::endl;
+    }
+
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {

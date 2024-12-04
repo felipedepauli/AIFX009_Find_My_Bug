@@ -7,7 +7,10 @@
 
 class VideoCapture : public iDevice {
 private:
-    cv::VideoCapture videoCapture; // Declaração do objeto para manipular vídeos
+    int frameSkipCounter = 0;
+    int frameSkipInterval = 2;
+    cv::VideoCapture videoCapture;
+    
 public:
     int setDevice(const std::string& devicePath) override;
     int enableDevice() override;

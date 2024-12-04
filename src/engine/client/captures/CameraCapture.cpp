@@ -5,7 +5,7 @@ cv::VideoCapture camera;
 
 int CameraCapture::setDevice(const std::string& devicePath) {
     try {
-        int cameraID = std::stoi(devicePath); // Converte o caminho para ID da câmera
+        int cameraID = std::stoi(devicePath);
         std::cout << "[CameraCapture] Setting device with ID: " << cameraID << std::endl;
         camera.open(cameraID);
 
@@ -45,17 +45,26 @@ int CameraCapture::disableDevice() {
 cv::Mat CameraCapture::getFrame() {
     if (!camera.isOpened()) {
         std::cerr << "[CameraCapture] Camera is not enabled!" << std::endl;
-        return cv::Mat(); // Retorna uma matriz vazia
+        return cv::Mat();
     }
 
     cv::Mat frame;
-    camera >> frame; // Captura o frame da câmera
+    camera >> frame;
 
     if (frame.empty()) {
         std::cerr << "[CameraCapture] Failed to capture a frame!" << std::endl;
-        return cv::Mat(); // Retorna uma matriz vazia
+        return cv::Mat();
     }
 
-    std::cout << "[CameraCapture] Frame captured successfully." << std::endl;
-    return frame; // Retorna o frame capturado
+    // Reduz a resolução para 240x240
+    cv::Mat resizedFrame;
+    cv::resize(frame, resizedFrame, cv::Size(240, 240));
+
+    // Converte o frame para escala de cinza
+    cv::Mat grayFrame;
+    cv::cvtColor(resizedFrame, grayFrame, cv::COLOR_BGR2GRAY);
+
+    std::cout << "[CameraCapture] Frame captured, resized to 240x240, and converted to grayscale." << std::endl;
+
+    return grayFrame; // Retorna o frame processado
 }

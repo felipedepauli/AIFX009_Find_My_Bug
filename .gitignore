@@ -3,3 +3,14 @@
 build_linux/
 build_win/
 resources/
+src/engine/server/processing/vision/models/yolo11n.onnx
+src/engine/server/processing/vision/models/yolo11n.pt
+src/engine/server/processing/vision/models/yolo11n_saved_model/fingerprint.pb
+src/engine/server/processing/vision/models/yolo11n_saved_model/metadata.yaml
+src/engine/server/processing/vision/models/yolo11n_saved_model/saved_model.pb
+src/engine/server/processing/vision/models/yolo11n_saved_model/yolo11n_float16.tflite
+src/engine/server/processing/vision/models/yolo11n_saved_model/yolo11n_float32.tflite
+src/engine/server/processing/vision/models/yolo11n_saved_model/variables/variables.data-00000-of-00001
+src/engine/server/processing/vision/models/yolo11n_saved_model/variables/variables.index
+model_factory/deploy/calibration_image_sample_data_20x128x128x3_float32.npy
+course/00_Tensorflow_Fundamentals_.ipynb
