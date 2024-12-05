@@ -23,22 +23,24 @@ else()
     message(FATAL_ERROR "Unsupported architecture: ${ARCH}")
 endif()
 
-# Inclui o toolchain
+# Include toolchain file
 if(CMAKE_TOOLCHAIN_FILE)
     include(${CMAKE_TOOLCHAIN_FILE})
 endif()
 
-# Configura o OpenCV
+# Configure OpenCV
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-# Diretórios de include
+# Directory for header files
 include_directories(${CMAKE_SOURCE_DIR}/include/engine/ ${OpenCV_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/include/3rdparty/ ${OpenCV_INCLUDE_DIRS})
+include_directories(/usr/local/include/eigen3 ${OpenCV_INCLUDE_DIRS})
 
-# Adiciona subdiretórios de clientes e servidores
+# Add subdirectories for clients and servers
 add_subdirectory(src/engine/)
 
-# Mensagem de status
+# Status message
 message(STATUS "Architecture: ${ARCH}")
 message(STATUS "Toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

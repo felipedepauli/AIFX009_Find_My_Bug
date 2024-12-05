@@ -8,7 +8,7 @@
 class VideoCapture : public iDevice {
 private:
     int frameSkipCounter = 0;
-    int frameSkipInterval = 2;
+    int frameSkipInterval = 1;
     cv::VideoCapture videoCapture;
     
 public:

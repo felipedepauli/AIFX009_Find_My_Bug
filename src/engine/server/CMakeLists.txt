@@ -1,4 +1,4 @@
-# Configuração do binário do servidor
+# Configure the server binary
 add_executable(
     server
     Server.cpp
@@ -6,5 +6,5 @@ add_executable(
     processing/vision/implYolo.cpp
 )
 
-# Linka bibliotecas do OpenCV, Boost e a biblioteca engine
-target_link_libraries(server PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} engine)
+# Link the OpenCV, Boost, engine and libbytetrack libraries
+target_link_libraries(server PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} engine bytetrack)

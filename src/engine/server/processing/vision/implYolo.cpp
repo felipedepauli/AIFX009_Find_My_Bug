@@ -1,10 +1,26 @@
 #include "server/processing/vision/implYolo.h"
 #include <iostream>
 #include <opencv2/dnn.hpp>
+#include <map>
+#include <cmath>
+
+// Map of class IDs to vehicle names
+const std::map<int, std::string> classIdToName = {
+    {1, "bicycle"},
+    {2, "car"},
+    {3, "motorcycle"},
+    {5, "bus"},
+    {7, "truck"}
+};
+
+// Sigmoid function
+float sigmoid(float x) {
+    return 1.0f / (1.0f + exp(-x));
+}
 
 // Constructor: Load the YOLO model
 SimpleVision::SimpleVision() {
-    const std::string modelPath = "/home/fpauli/aif/git/AIFX009_Find_My_Bug/src/engine/server/processing/vision/models/yolo11n.onnx";
+    const std::string modelPath = "/home/fpauli/aif/git/AIFX009_Find_My_Bug/src/engine/server/processing/vision/models/yolo11m.onnx";
     net = cv::dnn::readNetFromONNX(modelPath);
 
     if (net.empty()) {
@@ -15,80 +31,115 @@ SimpleVision::SimpleVision() {
     std::cout << "[SimpleVision] Model loaded successfully from: " << modelPath << std::endl;
 }
 
-// Implementation of detect: Detects vehicles and draws bounding boxes
-void SimpleVision::detect(const cv::Mat& frame) {
-    // Preprocess the frame for YOLO
-    const int inputWidth = 640; // YOLO input width
-    const int inputHeight = 640; // YOLO input height
+Detections SimpleVision::detect(const cv::Mat& frame) {
+    // Constants for input blob
+    const int inputWidth = 640;
+    const int inputHeight = 640;
     const float scaleFactor = 1.0 / 255.0;
-    const cv::Scalar meanValues(0, 0, 0); // No mean subtraction
+    const cv::Scalar meanValues(0, 0, 0);
     const bool swapRB = true;
 
+    // Create blob from the image
     cv::Mat blob = cv::dnn::blobFromImage(frame, scaleFactor, cv::Size(inputWidth, inputHeight), meanValues, swapRB, false);
 
-    // Set the blob as input to the network
+    // Set the input blob
     net.setInput(blob);
 
-    // Forward pass to get the detection results
+    // Run inference
     std::vector<cv::Mat> outputs;
     net.forward(outputs, net.getUnconnectedOutLayersNames());
 
-    // Post-process detections
-    float confidenceThreshold = 0.5;
-    float nmsThreshold = 0.4; // Non-max suppression threshold
-    std::vector<int> classIds;
-    std::vector<float> confidences;
-    std::vector<cv::Rect> boxes;
+    // Get output details
+    int rows = outputs[0].size[1];
+    int dimensions = outputs[0].size[2];
+    bool isYoloV8 = false;
 
-    for (const auto& output : outputs) {
-        for (int i = 0; i < output.rows; i++) {
-            const auto* data = output.ptr<float>(i);
-            float confidence = data[4]; // Objectness confidence
-            if (confidence > confidenceThreshold) {
-                // Extract class scores
-                cv::Mat scores = output.row(i).colRange(5, output.cols);
-                cv::Point classIdPoint;
-                double maxClassScore;
-                cv::minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
+    if (dimensions > rows) { // Check if output shape matches YOLOv8
+        isYoloV8 = true;     // At least YOLOv8 (can be YOLOv11)
+        rows = outputs[0].size[2];
+        dimensions = outputs[0].size[1];
 
-                if (maxClassScore > confidenceThreshold) {
-                    int centerX = static_cast<int>(data[0] * frame.cols);
-                    int centerY = static_cast<int>(data[1] * frame.rows);
-                    int width = static_cast<int>(data[2] * frame.cols);
-                    int height = static_cast<int>(data[3] * frame.rows);
-                    int left = centerX - width / 2;
-                    int top = centerY - height / 2;
+        outputs[0] = outputs[0].reshape(1, dimensions);
+        cv::transpose(outputs[0], outputs[0]);
+    }
 
-                    classIds.push_back(classIdPoint.x);
-                    confidences.push_back(static_cast<float>(maxClassScore));
-                    boxes.emplace_back(left, top, width, height);
-                }
+    float* data = (float*)outputs[0].data;
+
+    float xFactor = static_cast<float>(frame.cols) / inputWidth;
+    float yFactor = static_cast<float>(frame.rows) / inputHeight;
+
+    // Initialize Detections
+    Detections detections;
+
+    // Loop through detections
+    for (int i = 0; i < rows; ++i) {
+        float confidence = isYoloV8 ? 0 : data[4];
+
+        if (isYoloV8 || confidence >= 0.25) { // Confidence threshold
+            float* classScores = isYoloV8 ? (data + 4) : (data + 5);
+            cv::Mat scores(1, 80, CV_32F, classScores);
+            cv::Point classIdPoint;
+            double maxClassScore;
+
+            cv::minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
+
+            if (maxClassScore > 0.45) { // Class score threshold
+                confidence = isYoloV8 ? maxClassScore : (confidence * maxClassScore);
+
+                float x = data[0];
+                float y = data[1];
+                float w = data[2];
+                float h = data[3];
+
+                int left = static_cast<int>((x - 0.5 * w) * xFactor);
+                int top = static_cast<int>((y - 0.5 * h) * yFactor);
+                int width = static_cast<int>(w * xFactor);
+                int height = static_cast<int>(h * yFactor);
+
+                detections.boxes.emplace_back(cv::Rect(left, top, width, height));
+                detections.classIds.push_back(classIdPoint.x);
+                detections.confidences.push_back(confidence);
             }
+        }
+        data += dimensions; // Move to the next anchor/detection
+    }
+
+    // Apply Non-Maximum Suppression (NMS)
+    std::vector<int> indices;
+    cv::dnn::NMSBoxes(detections.boxes, detections.confidences, 0.5, 0.4, indices);
+
+    // Filter detections based on NMS and validate bounding box area
+    Detections filteredDetections;
+
+    // Define the maximum area limit for bounding boxes
+    const int maxArea = 50000;
+
+    for (int idx : indices) {
+        const cv::Rect& box = detections.boxes[idx];
+        int area = box.width * box.height;
+
+        // Check if the bounding box area is greater than the limit
+        if (area <= maxArea) {
+            filteredDetections.boxes.push_back(box);
+            filteredDetections.classIds.push_back(detections.classIds[idx]);
+            filteredDetections.confidences.push_back(detections.confidences[idx]);
+
+            // Add the class label to the new field
+            std::string className = classIdToName.count(detections.classIds[idx])
+                                    ? classIdToName.at(detections.classIds[idx])
+                                    : "unknown";
+            filteredDetections.labels.push_back(className);
+        } else {
+            std::cout << "....................[SimpleVision] Bounding box discarded. Area: " << area << std::endl;
         }
     }
 
-    // Apply non-max suppression to filter overlapping boxes
-    std::vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, confidences, confidenceThreshold, nmsThreshold, indices);
+    std::cout << "[SimpleVision] Detections completed. Objects detected: " << filteredDetections.boxes.size() << std::endl;
 
-    // Draw the boxes on the image
-    for (int idx : indices) {
-        cv::Rect box = boxes[idx];
-        cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 2);
+    return filteredDetections;
 
-        std::string label = "Vehicle: " + std::to_string(classIds[idx]) + " (" + std::to_string(confidences[idx]) + ")";
-        int baseline;
-        cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseline);
-        int top = std::max(box.y, labelSize.height);
-        cv::rectangle(frame, cv::Point(box.x, top - labelSize.height),
-                      cv::Point(box.x + labelSize.width, top + baseline), cv::Scalar(0, 255, 0), cv::FILLED);
-        cv::putText(frame, label, cv::Point(box.x, top), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0), 1);
-    }
-
-    // Display the frame with detections
-    cv::imshow("Vehicle Detector - YOLO", frame);
-    std::cout << "[SimpleVision] Frame processed with YOLO detections." << std::endl;
 }
+
 
 // Predict method: Placeholder
 void SimpleVision::predict(const cv::Mat& frame) {

@@ -12,7 +12,7 @@ private:
 public:
     SimpleVision(); // Default constructor
 
-    void detect(const cv::Mat& frame) override;
+    Detections detect(const cv::Mat& frame) override;
     void predict(const cv::Mat& frame) override;
     void draw(cv::Mat& frame) override;
 };

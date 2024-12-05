@@ -30,5 +30,7 @@ make -j4
 make install
 
 
+https://github.com/ifzhang/ByteTrack
+sudo apt install build-essential git cmake libprotobuf-dev protobuf-compiler libomp-dev libvulkan-dev vulkan-tools libopencv-dev
 
 

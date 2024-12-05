@@ -8,16 +8,16 @@ class iDevice {
 public:
     virtual ~iDevice() = default;
 
-    // Configura o dispositivo (ex.: caminho do vídeo, URL de streaming ou ID da câmera)
+    // Configures the device (e.g., video path, streaming URL, or camera ID)
     virtual int setDevice(const std::string& devicePath) = 0;
 
-    // Ativa o dispositivo para captura
+    // Enables the device for capture
     virtual int enableDevice() = 0;
 
-    // Desativa o dispositivo
+    // Disables the device
     virtual int disableDevice() = 0;
 
-    // Obtém um frame capturado
+    // Retrieves a captured frame
     virtual cv::Mat getFrame() = 0;
 };
 

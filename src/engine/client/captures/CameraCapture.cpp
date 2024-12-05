@@ -10,7 +10,7 @@ int CameraCapture::setDevice(const std::string& devicePath) {
         camera.open(cameraID);
 
         if (camera.isOpened()) {
-            return 0; // Sucesso
+            return 0; // Success
         } else {
             std::cerr << "[CameraCapture] Failed to open camera with ID: " << cameraID << std::endl;
             return -1;
@@ -56,15 +56,15 @@ cv::Mat CameraCapture::getFrame() {
         return cv::Mat();
     }
 
-    // Reduz a resolução para 240x240
+    // Reduce the resolution to 240x240
     cv::Mat resizedFrame;
     cv::resize(frame, resizedFrame, cv::Size(240, 240));
 
-    // Converte o frame para escala de cinza
+    // Convert the frame to grayscale
     cv::Mat grayFrame;
     cv::cvtColor(resizedFrame, grayFrame, cv::COLOR_BGR2GRAY);
 
     std::cout << "[CameraCapture] Frame captured, resized to 240x240, and converted to grayscale." << std::endl;
 
-    return grayFrame; // Retorna o frame processado
+    return grayFrame; // Return the processed frame
 }

@@ -34,6 +34,7 @@ public:
 
         // Vision-based detection
         vision.detect(frame);
+        vision.track();
 
         // Waits 30ms or exits if 'q' is pressed
         if (cv::waitKey(30) == 'q') {

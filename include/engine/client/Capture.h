@@ -11,22 +11,22 @@ private:
 public:
     explicit Capture(std::unique_ptr<iDevice> device) : device(std::move(device)) {}
 
-    // Configura o dispositivo (chama o método do iDevice encapsulado)
+    // Configures the device (calls the method of the encapsulated iDevice)
     int setDevice(const std::string& devicePath) {
         return device->setDevice(devicePath);
     }
 
-    // Ativa o dispositivo
+    // Enables the device
     int enableDevice() {
         return device->enableDevice();
     }
 
-    // Desativa o dispositivo
+    // Disables the device
     int disableDevice() {
         return device->disableDevice();
     }
 
-    // Obtém um frame capturado
+    // Gets a captured frame
     cv::Mat getFrame() {
         return device->getFrame();
     }
