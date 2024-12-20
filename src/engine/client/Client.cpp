@@ -81,18 +81,18 @@ void Client::run(const std::string& devicePath) {
             break;
         }
 
-        // Displays the frame
-        cv::imshow("Video Playback", frame);
+        // // Displays the frame
+        // cv::imshow("Video Playback", frame);
 
-        // Waits 30ms or exits if 'q' is pressed
-        if (cv::waitKey(30) == 'q') {
-            std::cout << "[Client] Playback interrupted by user." << std::endl;
-            break;
-        }
+        // // Waits 30ms or exits if 'q' is pressed
+        // if (cv::waitKey(30) == 'q') {
+        //     std::cout << "[Client] Playback interrupted by user." << std::endl;
+        //     break;
+        // }
     }
 
     capture->disableDevice();
-    cv::destroyAllWindows();
+    // cv::destroyAllWindows();
 
     // Closes the connection with the server
     try {

@@ -1,8 +1,8 @@
 .vscode/
 3rdparty/
-build_linux/
-build_win/
-resources/
+build/
+results/*.json
+results/*.jpg
 src/engine/server/processing/vision/models/yolo11n.onnx
 src/engine/server/processing/vision/models/yolo11n.pt
 src/engine/server/processing/vision/models/yolo11n_saved_model/fingerprint.pb
@@ -14,3 +14,6 @@ src/engine/server/processing/vision/models/yolo11n_saved_model/variables/variabl
 src/engine/server/processing/vision/models/yolo11n_saved_model/variables/variables.index
 model_factory/deploy/calibration_image_sample_data_20x128x128x3_float32.npy
 course/00_Tensorflow_Fundamentals_.ipynb
+src/engine/server/processing/vision/models/yolo11s.onnx
+src/engine/server/processing/vision/models/yolo11s.pt
+src/engine/server/processing/vision/models/yolov8m.pt

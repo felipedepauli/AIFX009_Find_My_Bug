@@ -37,11 +37,9 @@ cv::Mat VideoCapture::getFrame() {
         frameSkipCounter = 0;
 
         cv::Mat resizedFrame;
-        cv::Mat grayFrame;
+        cv::resize(frame, resizedFrame, cv::Size(640, 640));
 
-        std::cout << "[VideoCapture] Frame captured, resized to 240x240, and converted to grayscale." << std::endl;
-
-        return frame;
+        return resizedFrame;
     } else {
         std::cerr << "[VideoCapture] Video capture is not enabled." << std::endl;
         return cv::Mat();

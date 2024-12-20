@@ -1,4 +1,4 @@
-# Define o binário do cliente
+# Define the client binary
 add_executable(
     client
     Client.cpp

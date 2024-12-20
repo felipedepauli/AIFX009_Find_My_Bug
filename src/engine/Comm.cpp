@@ -14,19 +14,19 @@ cv::Mat Comm::receiveFrameFromSocket(boost::asio::ip::tcp::socket& socket) {
         frameSize = ntohl(frameSize); // Converts from network byte order to host byte order
 
         if (frameSize == 1) { // Termination signal
-            std::cout << "[Comm] Client sent termination signal. Closing connection." << std::endl;
+            std::cout << "[Comm             ] Client sent termination signal. Closing connection." << std::endl;
             return cv::Mat(); // Return an empty frame to signal termination
         }
 
         // Read the frame data
         std::vector<uchar> frameData(frameSize);
         boost::asio::read(socket, boost::asio::buffer(frameData));
-        std::cout << "[Comm] Received frame of size: " << frameData.size() << " bytes." << std::endl;
+        std::cout << "[Comm             ] Received frame of size: " << frameData.size() << " bytes." << std::endl;
 
         // Decode the frame
         return cv::imdecode(frameData, cv::IMREAD_COLOR);
     } catch (std::exception& e) {
-        std::cerr << "[Comm] Error receiving frame: " << e.what() << std::endl;
+        std::cerr << "[Comm             ] Error receiving frame: " << e.what() << std::endl;
         return cv::Mat(); // Return an empty frame in case of error
     }
 }
@@ -39,14 +39,14 @@ std::function<void()> Comm::bind(boost::asio::ip::tcp::socket socket, std::share
             while (processing->isRunning()) {
                 auto frame = this->receiveFrameFromSocket(*sharedSocket);
                 if (frame.empty()) {
-                    std::cout << "[Comm] Connection closed." << std::endl;
+                    std::cout << "[Comm             ] Connection closed." << std::endl;
                     processing->stop(); // Signal processing to stop
                     break; // Exit the loop
                 }
                 processing->run(frame);
             }
         } catch (std::exception& e) {
-            std::cerr << "[Comm] Error in connection handler: " << e.what() << std::endl;
+            std::cerr << "[Comm             ] Error in connection handler: " << e.what() << std::endl;
         }
     };
 }
@@ -55,15 +55,15 @@ std::function<void()> Comm::bind(boost::asio::ip::tcp::socket socket, std::share
 boost::asio::ip::tcp::socket Comm::startListening(int port) {
     try {
         boost::asio::ip::tcp::acceptor acceptor(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
-        std::cout << "[Comm] Listening on port " << port << "..." << std::endl;
+        std::cout << "[Comm             ] Listening on port " << port << "..." << std::endl;
 
         boost::asio::ip::tcp::socket socket(io_context);
         acceptor.accept(socket); // Accepts a single connection
-        std::cout << "[Comm] Connection established." << std::endl;
+        std::cout << "[Comm             ] Connection established." << std::endl;
 
         return socket; // Return the connected socket
     } catch (std::exception& e) {
-        std::cerr << "[Comm] Error: " << e.what() << std::endl;
+        std::cerr << "[Comm             ] Error: " << e.what() << std::endl;
         throw; // Re-throw the exception to signal failure
     }
 }
@@ -79,8 +79,8 @@ void Comm::sendMessage(const std::string& message, const std::string& host, int 
 
         std::string fullMessage = message + "\n";
         boost::asio::write(socket, boost::asio::buffer(fullMessage));
-        std::cout << "[Comm] Message sent: " << message << std::endl;
+        std::cout << "[Comm             ] Message sent: " << message << std::endl;
     } catch (std::exception& e) {
-        std::cerr << "[Comm] Error: " << e.what() << std::endl;
+        std::cerr << "[Comm             ] Error: " << e.what() << std::endl;
     }
 }

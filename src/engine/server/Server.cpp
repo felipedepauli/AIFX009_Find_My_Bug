@@ -87,7 +87,7 @@ int main() {
             // Create a new processing object
             auto processing = std::make_shared<Processing>();
 
-            // Vincula o socket ao processamento
+            // Bind the socket to the processing
             auto task = comm.bind(std::move(socket), processing);
 
             // Add the task to the thread pool
