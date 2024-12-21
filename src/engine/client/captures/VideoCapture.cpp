@@ -1,4 +1,4 @@
-#include "client/captures/VideoCapture.h"
+#include "VideoCapture.hpp"
 
 int VideoCapture::setDevice(const std::string& devicePath) {
     std::cout << "[VideoCapture] Setting video file path: " << devicePath << std::endl;

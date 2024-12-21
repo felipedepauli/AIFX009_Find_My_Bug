@@ -1,4 +1,4 @@
-#include "client/captures/CameraCapture.h"
+#include "CameraCapture.hpp"
 #include <opencv2/opencv.hpp>
 
 cv::VideoCapture camera;

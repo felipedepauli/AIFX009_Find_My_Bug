@@ -1,7 +1,7 @@
 #ifndef DIRECTORYCAPTURE_H
 #define DIRECTORYCAPTURE_H
 
-#include "iDevice.h"
+#include "iDevice.hpp"
 #include <iostream>
 #include <opencv2/opencv.hpp>
 

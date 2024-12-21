@@ -4,10 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <memory>
 #include <functional>
-#include "server/processing/vision/VisionProcessor.h"
+#include "processing/vision/VisionProcessor.hpp"
 #include <librdkafka/rdkafka.h>
-
-
 
 // Forward declaration of classes
 class Comm;

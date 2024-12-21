@@ -1,7 +1,7 @@
 #ifndef SIMPLEVISION_H
 #define SIMPLEVISION_H
 
-#include "server/processing/vision/VisionBase.h"
+#include "../VisionBase.hpp"
 #include <opencv2/dnn.hpp>
 #include <string>
 

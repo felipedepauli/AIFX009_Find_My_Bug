@@ -1,5 +1,5 @@
-#include "client/Client.h"
-#include "Comm.h"
+#include "Client.hpp"
+#include "../Comm.hpp"
 
 // Declares the function parseInputType
 InputType parseInputType(const std::string& typeStr) {

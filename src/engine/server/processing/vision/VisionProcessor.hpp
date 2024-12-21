@@ -1,9 +1,9 @@
 #ifndef VISIONPROCESSOR_H
 #define VISIONPROCESSOR_H
 
-#include "VisionBase.h"
-#include "server/processing/vision/detectors/implYolo.h"
-#include "server/processing/vision/TrackingProcessor.h"
+#include "VisionBase.hpp"
+#include "detectors/implYolo.hpp"
+#include "TrackingProcessor.hpp"
 #include "ByteTrack/BYTETracker.h"
 #include <memory>
 #include <iostream>

@@ -1,7 +1,7 @@
 #ifndef CAPTURE_H
 #define CAPTURE_H
 
-#include "client/captures/iDevice.h"
+#include "captures/iDevice.hpp"
 #include <memory>
 
 class Capture {

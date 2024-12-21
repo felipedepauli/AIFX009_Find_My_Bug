@@ -1,7 +1,7 @@
 #ifndef CAMERACAPTURE_H
 #define CAMERACAPTURE_H
 
-#include "iDevice.h"
+#include "iDevice.hpp"
 #include <iostream>
 #include <opencv2/opencv.hpp>
 

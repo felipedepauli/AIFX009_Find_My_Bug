@@ -1,4 +1,4 @@
-#include "client/captures/StreamingCapture.h"
+#include "StreamingCapture.hpp"
 
 int StreamingCapture::setDevice(const std::string& devicePath) {
     std::cout << "[StreamingCapture] Setting stream URL: " << devicePath << std::endl;

@@ -1,5 +1,5 @@
-#include "server/Server.h"
-#include "Comm.h"
+#include "Server.hpp"
+#include "../Comm.hpp"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <queue>

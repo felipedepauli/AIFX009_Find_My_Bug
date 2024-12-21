@@ -1,11 +1,11 @@
-#ifndef COMM_H
-#define COMM_H
+#ifndef COMM_HPP
+#define COMM_HPP
 
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
 #include <functional>
 #include <vector>
-#include "server/Server.h"
+#include "server/Server.hpp"
 
 class Comm {
 private:

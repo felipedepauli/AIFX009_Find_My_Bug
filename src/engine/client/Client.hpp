@@ -1,11 +1,11 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "Capture.h"
-#include "captures/CameraCapture.h"
-#include "captures/StreamingCapture.h"
-#include "captures/VideoCapture.h"
-#include "captures/DirectoryCapture.h"
+#include "Capture.hpp"
+#include "captures/CameraCapture.hpp"
+#include "captures/StreamingCapture.hpp"
+#include "captures/VideoCapture.hpp"
+#include "captures/DirectoryCapture.hpp"
 #include <memory>
 #include <string>
 #include <iostream>

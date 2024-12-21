@@ -1,4 +1,4 @@
-#include "client/captures/DirectoryCapture.h"
+#include "DirectoryCapture.hpp"
 
 int DirectoryCapture::setDevice(const std::string& devicePath) {
     std::cout << "[DirectoryCapture] Setting directory path: " << devicePath << std::endl;
