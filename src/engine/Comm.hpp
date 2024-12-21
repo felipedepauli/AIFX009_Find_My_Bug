@@ -22,7 +22,7 @@ public:
     void handleConnection(boost::asio::ip::tcp::socket socket, std::function<void(const cv::Mat&)> processFrame);
 
     // Binds a socket to a processing object and returns a callable task
-    std::function<void()> bind(boost::asio::ip::tcp::socket socket, std::shared_ptr<Processing> processing);
+    std::function<void()> bind(boost::asio::ip::tcp::socket socket, std::shared_ptr<Server> processing);
 
     // Listens for incoming connections and returns the connected socket
     boost::asio::ip::tcp::socket startListening(int port);

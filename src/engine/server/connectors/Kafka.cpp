@@ -19,7 +19,8 @@ Kafka::~Kafka() {
     }
 
     if (kafkaProducer) {
-        rd_kafka_flush(kafkaProducer, 1000); // Wait for max 1000ms for messages to be delivered
+        // Flush to ensure all messages are sent before destroying
+        rd_kafka_flush(kafkaProducer, 5000); // Wait up to 5000ms
         rd_kafka_destroy(kafkaProducer);
     }
 }
@@ -32,6 +33,11 @@ bool Kafka::initializeProducer() {
         std::cerr << "[Kafka            ] Failed to set Kafka configuration: " << errstr << std::endl;
         return false;
     }
+
+    if (rd_kafka_conf_set(kafkaConf, "log.connection.close", "false", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK) {
+    std::cerr << "[Kafka            ] Failed to set Kafka configuration: " << errstr << std::endl;
+    return false;
+}
 
     kafkaProducer = rd_kafka_new(RD_KAFKA_PRODUCER, kafkaConf, errstr, sizeof(errstr));
     if (!kafkaProducer) {
@@ -49,7 +55,7 @@ bool Kafka::initializeProducer() {
 }
 
 // Method to send a message containing the frame and JSON data to the Kafka topic
-int Kafka::sendMessage(const cv::Mat& frame, const nlohmann::json& jsonData) {
+int Kafka::produce(const cv::Mat& frame, const nlohmann::json& jsonData) {
     try {
         // Convert frame to a byte buffer (encoded as JPEG)
         std::vector<uchar> buffer;
@@ -62,6 +68,10 @@ int Kafka::sendMessage(const cv::Mat& frame, const nlohmann::json& jsonData) {
         std::string jsonString = jsonData.dump();
         std::string delimiter = "---FRAME_SEPARATOR---";
         std::string messagePayload = jsonString + delimiter + std::string(buffer.begin(), buffer.end());
+
+        std::cout << "[Kafka            ] Sending message to topic: " << topic << std::endl;
+        std::cout << "[Kafka            ] Message size: " << messagePayload.size() << " bytes" << std::endl;
+        std::cout << "[Kafka            ] Message: " << messagePayload.substr(0, 100) << "..." << std::endl;
 
         // Send the message to Kafka
         int err = rd_kafka_produce(

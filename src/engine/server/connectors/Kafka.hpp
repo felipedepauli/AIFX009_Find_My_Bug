@@ -26,7 +26,7 @@ public:
     ~Kafka();
 
     // Method to send a message containing the frame and JSON data to the Kafka topic
-    int sendMessage(const cv::Mat& frame, const nlohmann::json& jsonData);
+    int produce(const cv::Mat& frame, const nlohmann::json& jsonData);
 };
 
 #endif // KAFKA_H

@@ -6,6 +6,7 @@
 VisionProcessor::VisionProcessor()
     : vision(std::make_unique<SimpleVision>()),
       tracking(std::make_unique<TrackingProcessor>()),
+      producer(std::make_unique<Kafka>("localhost:9092", "detections")),
       frameCounter(0) {}
 
 // Detect method: Delegates the frame to the VisionBase implementation
@@ -63,6 +64,9 @@ void VisionProcessor::detect(const cv::Mat& frame) {
         }
 
         frameCounter++;  // Increment the frame for the next image
+
+        // Write the json on results
+        results = jsonData;
     } catch (const cv::Exception& e) {
         std::cerr << "[VisionProcessor  ] Exception in imwrite or json creation: " << e.what() << std::endl;
     }
@@ -78,7 +82,16 @@ void VisionProcessor::draw(cv::Mat& frame) {
     vision->draw(frame);
 }
 
+
+
+
 // Track method
 void VisionProcessor::track() {
     
+}
+
+
+// GetResults method
+nlohmann::json VisionProcessor::getResults() {
+    return results;
 }

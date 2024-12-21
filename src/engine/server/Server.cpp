@@ -10,6 +10,33 @@
 #include <vector>
 #include <memory>
 
+Server::Server() : 
+    running(true),
+    vision(std::make_unique<VisionProcessor>()),
+    producer(std::make_unique<Kafka>("172.18.106.110:9092", "detections"))
+    {}
+
+
+// Stops the server by setting the running flag to false
+void Server::stop() {
+    running = false;
+}
+
+// Checks if the server is running
+bool Server::isRunning() const {
+    return running;
+}
+
+// Main processing loop: handles frames and triggers vision processing
+void Server::run(const cv::Mat& frame) {
+    if (!running) return; // Stop processing if the flag is false
+
+    // Vision processing pipeline
+    vision->detect(frame);   // Detect objects in the frame
+    vision->track();         // Track the detected objects
+    producer->produce(frame, vision->getResults());
+}
+
 // ThreadPool implementation
 class ThreadPool {
 public:
@@ -71,7 +98,6 @@ private:
     bool stop;
 };
 
-
 // Main server logic
 int main() {
     try {
@@ -84,11 +110,11 @@ int main() {
             // Accepts the connection and returns the socket
             auto socket = comm.startListening(8080);
 
-            // Create a new processing object
-            auto processing = std::make_shared<Processing>();
+            // Create a new server object
+            auto server = std::make_shared<Server>();
 
-            // Bind the socket to the processing
-            auto task = comm.bind(std::move(socket), processing);
+            // Bind the socket to the server
+            auto task = comm.bind(std::move(socket), server);
 
             // Add the task to the thread pool
             poolThreads.addTask(std::move(task));

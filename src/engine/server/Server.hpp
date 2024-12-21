@@ -1,48 +1,29 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include <opencv2/opencv.hpp>
 #include <memory>
 #include <functional>
 #include "processing/vision/VisionProcessor.hpp"
-#include <librdkafka/rdkafka.h>
+#include "connectors/Kafka.hpp"
 
 // Forward declaration of classes
 class Comm;
 
-// The Processing class encapsulates the logic for handling frames
-class Processing {
+// The Server class encapsulates the logic for handling frames
+class Server {
 private:
     bool running;
-    VisionProcessor vision;
+    std::unique_ptr<VisionProcessor> vision;
+    std::unique_ptr<Kafka> producer;
 
 public:
-    Processing() : running(true) {}
-    ~Processing() {
-        // cv::destroyAllWindows();
-    }
+    Server();
+    ~Server() {}
 
-    void stop() {
-        running = false;
-    }
-
-    bool isRunning() const {
-        return running;
-    }
-
-    void run(const cv::Mat& frame) {
-        if (!running) return; // Stop processing if the flag is false
-
-        // Vision-based detection
-        vision.detect(frame);
-        vision.track();
-
-        // // Waits 30ms or exits if 'q' is pressed
-        // if (cv::waitKey(30) == 'q') {
-        //     std::cout << "[Server] Playback interrupted by user." << std::endl;
-        //     running = false;
-        // }
-    }
+    void stop();
+    bool isRunning() const;
+    void run(const cv::Mat& frame);
 };
 
-#endif // SERVER_H
+#endif // SERVER_HPP

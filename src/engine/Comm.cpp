@@ -32,7 +32,7 @@ cv::Mat Comm::receiveFrameFromSocket(boost::asio::ip::tcp::socket& socket) {
 }
 
 // Binds a socket to a Processing object and returns a callable task
-std::function<void()> Comm::bind(boost::asio::ip::tcp::socket socket, std::shared_ptr<Processing> processing) {
+std::function<void()> Comm::bind(boost::asio::ip::tcp::socket socket, std::shared_ptr<Server> processing) {
     auto sharedSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(socket));
     return [this, sharedSocket, processing]() mutable {
         try {
